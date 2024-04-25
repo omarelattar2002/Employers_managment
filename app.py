@@ -29,11 +29,12 @@ def get_current_user():
 @app.route('/')
 def index():
     user = get_current_user()
-    return render_template('home.html', user = user)
+    return render_template('login.html', user = user)
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
+
     user = get_current_user()
     error = None
     db = get_database()
@@ -67,7 +68,7 @@ def register():
         db.execute('insert into users ( name, password) values (?, ?)',[name, hashed_password])
         db.commit()
         return redirect(url_for('index'))
-    return render_template('register.html',user = user)
+    return render_template('register.html', user = user)
 
 @app.route('/dashboard')
 def dashboard():
@@ -75,7 +76,7 @@ def dashboard():
     db = get_database()
     emp_cur = db.execute('select * from emp')
     allemp = emp_cur.fetchall()
-    return render_template('dashboard.html', user = user, allemp = allemp)
+    return render_template('dashboard.html', allemp = allemp, user = user)
 
 @app.route('/addnewemployee', methods = ['POST', 'GET'])
 def addnewemployee():
@@ -95,9 +96,9 @@ def addnewemployee():
 def singleemployee(empid):
     user = get_current_user()
     db = get_database()
-    emp_cur = db.execute('select * from emp where empid = ?', [empid])
+    emp_cur = db.execute('select * from emp where empid =?', [empid])
     single_emp = emp_cur.fetchone()
-    return render_template('singleemployee.html', user = user, single_emp = single_emp)
+    return render_template('singleemployee.html', single_emp = single_emp, user = user)
 
 
 @app.route('/fetchone/<int:empid>')
@@ -106,7 +107,7 @@ def fetchone(empid):
     db = get_database()
     emp_cur = db.execute('select * from emp where empid = ?', [empid])
     single_emp = emp_cur.fetchone()
-    return render_template('updateemployee.html', user = user, single_emp = single_emp)
+    return render_template('updateemployee.html', single_emp = single_emp, user = user)
 
 
 
@@ -121,7 +122,7 @@ def updateemployee():
         phone = request.form['phone']
         address = request.form['address']
         db = get_database()
-        db.execute('insert into emp set name =?, email =?, phone =?, address =? where empid = ?', [name, email, phone, address, empid])
+        db.execute('update emp set name =?, email =?, phone =?, address =? where empid =?', [name, email, phone, address, empid])
         db.commit()
         return redirect(url_for('dashboard'))
     return render_template('updateemployee.html', user = user)
@@ -138,10 +139,10 @@ def deleteemp(empid):
     return render_template('dashboard.html', user = user)
 
 
-@app.route
+@app.route('/logout')
 def logout():
     session.pop('user', None)
-    return render_template('home.html')
+    return render_template('login.html', user = None)
 
 
 
